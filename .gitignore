@@ -6,3 +6,5 @@ node_modules/
 .vercel/
 .tanstack/
 .node_modules.lock
+.output/
+data/

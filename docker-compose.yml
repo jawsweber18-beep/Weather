@@ -1,0 +1,17 @@
+services:
+  quorum:
+    build: .
+    container_name: quorum-weather
+    ports:
+      - "3000:3000"
+    environment:
+      # The exact address you open the app at (must be https, see SELF_HOSTING.md).
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:?set BETTER_AUTH_URL in .env}
+      # Long random string; keeps people signed in across restarts.
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET in .env}
+    volumes:
+      - quorum-data:/data
+    restart: unless-stopped
+
+volumes:
+  quorum-data:

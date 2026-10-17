@@ -111,7 +111,10 @@ async function createPgliteSql(): Promise<Sql> {
   // data survives source edits (it resets on dev-server restart).
   globalRef.__pgliteInstance__ ??= (async () => {
     const { PGlite } = await import("@electric-sql/pglite");
-    const pg = new PGlite({
+    // PGLITE_DATA_DIR persists the database to disk (self-hosting without
+    // Postgres); unset keeps the in-memory instance.
+    const dataDir = process.env.PGLITE_DATA_DIR?.trim() || undefined;
+    const pg = new PGlite(dataDir, {
       parsers: {
         [OID_INT8]: Number,
         [OID_DATE]: identity,

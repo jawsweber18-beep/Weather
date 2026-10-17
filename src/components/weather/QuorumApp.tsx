@@ -19,11 +19,13 @@ import {
   SUGGESTED,
   cityGuessFromTimezone,
   placeFromTimezone,
+  readHiddenSources,
   readRecentPlaces,
   readSavedPlace,
   readSavedTheme,
   readSavedUnits,
   rememberPlace,
+  saveHiddenSources,
   saveTheme,
   saveUnits,
   type ThemeChoice,
@@ -32,6 +34,7 @@ import { formatClock, formatDayName, formatHourTick, formatHourTip, formatLongDa
 import type { Briefing, Place, SourceForecast, Units } from "@/lib/weather/types";
 import type { HourlyChart } from "@/components/weather/HourlyChart";
 import type { RadarMap } from "@/components/weather/RadarMap";
+import { AccountMenu } from "@/components/weather/AccountMenu";
 
 function applyTheme(next: ThemeChoice) {
   document.documentElement.dataset.theme = next;
@@ -136,7 +139,14 @@ export function QuorumApp() {
       .then((data) => {
         if (cancelled) return;
         setBriefing(data);
-        setEnabled(new Set(data.sources.filter((source) => source.status === "ok").map((source) => source.id)));
+        const hidden = new Set(readHiddenSources());
+        setEnabled(
+          new Set(
+            data.sources
+              .filter((source) => source.status === "ok" && !hidden.has(source.id))
+              .map((source) => source.id),
+          ),
+        );
         setPhase(data.error ? "error" : "ready");
         setError(data.error);
       })
@@ -222,6 +232,7 @@ export function QuorumApp() {
               </div>
               <LocateButton onPick={choosePlace} />
               <ThemeButton theme={theme} onChoose={chooseTheme} />
+              <AccountMenu />
             </div>
           </div>
         </header>
@@ -262,65 +273,23 @@ export function QuorumApp() {
                   onSelect={setSelected}
                 />
 
-                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-5">
-                  <section className="desk-card p-4 md:col-span-2 md:p-5">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <h2 className="font-display text-2xl tracking-tight">
-                        {selected ? formatDayName(selected, today) : "Offices"}
-                      </h2>
-                      <p className="text-sm text-muted">{offices.length} in the reading</p>
-                    </div>
-                    <p className={clsx("mt-1 text-sm", agreement.tone === "wide" ? "text-warn" : "text-muted")}>
-                      {agreement.label}. {agreement.detail}
-                    </p>
-                    <SpreadRail
-                      day={selectedDay}
-                      sources={sources}
-                      enabled={enabled}
-                      selected={selected}
-                      units={units}
-                    />
-                    <ul className="mt-3 divide-y divide-line">
-                      {sources.map((source) => (
-                        <ModelRow
-                          key={source.id}
-                          source={source}
-                          date={selected}
-                          units={units}
-                          on={enabled.has(source.id)}
-                          onToggle={() => {
-                            setEnabled((current) => {
-                              const next = new Set(current);
-                              if (next.has(source.id)) next.delete(source.id);
-                              else next.add(source.id);
-                              return next;
-                            });
-                          }}
-                        />
-                      ))}
-                    </ul>
-                    {phase === "loading" && !briefing ? <p className="mt-4 text-sm text-muted">Asking the offices…</p> : null}
-                    <FeedNote sources={sources} />
-                  </section>
-
-                  <section className="desk-card min-w-0 p-4 md:col-span-3 md:p-5">
-                    <h2 className="font-display text-2xl tracking-tight">
-                      {!selected || selected === today ? "Coming hours" : `${formatDayName(selected, today)} by hour`}
-                    </h2>
-                    <p className="mt-1 text-sm text-muted">
-                      The line is the median. The band is how far the offices sit apart. Bars are the chance of precipitation.
-                    </p>
-                    <div className="mt-3">
-                      {phase === "loading" && !briefing ? (
-                        <div className="h-56 animate-pulse rounded-2xl bg-line" />
-                      ) : Chart ? (
-                        <Chart points={points} units={units} />
-                      ) : (
-                        <div className="h-56 rounded-2xl bg-line/60" />
-                      )}
-                    </div>
-                  </section>
-                </div>
+                <section className="desk-card mt-4 min-w-0 p-4 md:p-5">
+                  <h2 className="font-display text-2xl tracking-tight">
+                    {!selected || selected === today ? "Coming hours" : `${formatDayName(selected, today)} by hour`}
+                  </h2>
+                  <p className="mt-1 text-sm text-muted">
+                    The line is the median. The band is how far the offices sit apart. Bars are the chance of precipitation.
+                  </p>
+                  <div className="mt-3">
+                    {phase === "loading" && !briefing ? (
+                      <div className="h-56 animate-pulse rounded-2xl bg-line" />
+                    ) : Chart ? (
+                      <Chart points={points} units={units} />
+                    ) : (
+                      <div className="h-56 rounded-2xl bg-line/60" />
+                    )}
+                  </div>
+                </section>
 
                 <section className="desk-card mt-4 p-3 md:p-4">
                   <div className="mb-3 flex items-baseline justify-between gap-3 px-1">
@@ -332,6 +301,50 @@ export function QuorumApp() {
                   ) : (
                     <div className="h-72 rounded-2xl bg-line/70 md:h-96" />
                   )}
+                </section>
+
+                <section className="desk-card mt-4 p-4 md:p-5">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <h2 className="font-display text-2xl tracking-tight">
+                      {selected ? formatDayName(selected, today) : "Offices"}
+                    </h2>
+                    <p className="text-sm text-muted">{offices.length} in the reading</p>
+                  </div>
+                  <p className={clsx("mt-1 text-sm", agreement.tone === "wide" ? "text-warn" : "text-muted")}>
+                    {agreement.label}. {agreement.detail}
+                  </p>
+                  <SpreadRail
+                    day={selectedDay}
+                    sources={sources}
+                    enabled={enabled}
+                    selected={selected}
+                    units={units}
+                  />
+                  <ul className="mt-3 divide-y divide-line">
+                    {sources.map((source) => (
+                      <ModelRow
+                        key={source.id}
+                        source={source}
+                        date={selected}
+                        units={units}
+                        on={enabled.has(source.id)}
+                        onToggle={() => {
+                          const hidden = new Set(readHiddenSources());
+                          if (enabled.has(source.id)) hidden.add(source.id);
+                          else hidden.delete(source.id);
+                          saveHiddenSources([...hidden]);
+                          setEnabled((current) => {
+                            const next = new Set(current);
+                            if (next.has(source.id)) next.delete(source.id);
+                            else next.add(source.id);
+                            return next;
+                          });
+                        }}
+                      />
+                    ))}
+                  </ul>
+                  {phase === "loading" && !briefing ? <p className="mt-4 text-sm text-muted">Asking the offices…</p> : null}
+                  <FeedNote sources={sources} />
                 </section>
               </>
             )}

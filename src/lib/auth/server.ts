@@ -82,8 +82,7 @@ const grokClientId = env("GROK_AUTH_CLIENT_ID") ?? PREVIEW_CLIENT_ID;
 const grokClientSecret = env("GROK_AUTH_CLIENT_SECRET") ?? PREVIEW_CLIENT_SECRET;
 
 /** True when federated sign-in is active (real auth is enforced). */
-export const authConfigured =
-  !authDisabled && Boolean(grokClientId && grokClientSecret);
+export const authConfigured = !authDisabled;
 
 // This app's own Better Auth origin. When deployed the deployer injects the
 // public URL. In the sandbox live preview there's no fixed URL (each preview gets
@@ -150,7 +149,10 @@ export const SESSION_TOKEN_COOKIE = "__Host-grok-auth.session_token";
 
 // Built separately so the `betterAuth({...})` call stays easy to edit without
 // breaking brackets (models often trip on the conditional plugin spread).
-const grokOAuthPlugin = authConfigured
+// Quorum is invite-only: accounts are created by the owner with
+// `npm run users`, so federated sign-in (which creates accounts on first
+// login) is switched off. Set GROK_PROVIDERS back to non-empty to restore it.
+const grokOAuthPlugin = authConfigured && GROK_PROVIDERS.length > 0
   ? genericOAuth({
       config: GROK_PROVIDERS.map(({ providerId, idp }) => ({
         providerId,
@@ -211,7 +213,10 @@ export const auth = betterAuth({
   session: { cookieCache: { enabled: true, maxAge: 300 } },
 
   // Local email/password — toggled only via `./email-password` (not a plugin).
-  ...(emailAndPasswordEnabled ? { emailAndPassword: { enabled: true } } : {}),
+  // `disableSignUp`: /sign-up/email is rejected — only `npm run users` adds accounts.
+  ...(emailAndPasswordEnabled
+    ? { emailAndPassword: { enabled: true, disableSignUp: true } }
+    : {}),
 
   // `__Host-` prefixed cookies: the browser REFUSES any same-named cookie that
   // carries a `Domain` attribute, so a sibling `*.grok.me` app cannot "toss" a
@@ -232,7 +237,9 @@ export const auth = betterAuth({
   },
 
   plugins: [
-    gateIdentitySessions(),
+    // Grok gate sign-in auto-creates accounts for any Grok viewer, so it stays
+    // off unless explicitly re-enabled.
+    ...(env("QUORUM_ALLOW_GATE_SIGNIN") === "true" ? [gateIdentitySessions()] : []),
 
     // One genericOAuth provider per upstream (when auth is on), all federating
     // to the broker with the SAME client and differing only by the `idp` hint.
