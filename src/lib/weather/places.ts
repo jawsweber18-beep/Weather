@@ -1,3 +1,4 @@
+import { pushPrefs } from "./prefs";
 import type { Place } from "./types";
 
 function place(
@@ -80,6 +81,7 @@ const PLACE_KEY = "quorum.place";
 const RECENT_KEY = "quorum.recent";
 const UNITS_KEY = "quorum.units";
 const THEME_KEY = "quorum.theme";
+const HIDDEN_KEY = "quorum.hidden";
 
 export type ThemeChoice = "light" | "dark";
 
@@ -94,6 +96,7 @@ export function readSavedTheme(): ThemeChoice | null {
 
 export function saveTheme(theme: ThemeChoice) {
   localStorage.setItem(THEME_KEY, theme);
+  pushPrefs();
 }
 
 export function readSavedPlace(): Place | null {
@@ -122,6 +125,7 @@ export function rememberPlace(placeToSave: Place) {
   localStorage.setItem(PLACE_KEY, JSON.stringify(placeToSave));
   const recent = [placeToSave, ...readRecentPlaces().filter((p) => p.id !== placeToSave.id)].slice(0, 5);
   localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
+  pushPrefs();
 }
 
 export function readSavedUnits(): "f" | "c" | null {
@@ -135,6 +139,23 @@ export function readSavedUnits(): "f" | "c" | null {
 
 export function saveUnits(units: "f" | "c") {
   localStorage.setItem(UNITS_KEY, units);
+  pushPrefs();
+}
+
+/** Forecast sources the user switched off. */
+export function readHiddenSources(): string[] {
+  try {
+    const raw = localStorage.getItem(HIDDEN_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveHiddenSources(ids: string[]) {
+  localStorage.setItem(HIDDEN_KEY, JSON.stringify(ids));
+  pushPrefs();
 }
 
 function parsePlace(value: unknown): Place | null {

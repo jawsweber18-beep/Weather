@@ -25,7 +25,7 @@ export type GrokProvider = {
   label: string;
 };
 
-export const GROK_PROVIDERS: readonly GrokProvider[] = [
-  { providerId: "grok-google", idp: "google", label: "Google" },
-  { providerId: "grok-x", idp: "twitter", label: "X" },
-];
+// Empty: Quorum is invite-only (email/password accounts created with
+// `npm run users`). Federated providers would let anyone create an account.
+// Previously: grok-google (idp "google") and grok-x (idp "twitter").
+export const GROK_PROVIDERS: readonly GrokProvider[] = [];
