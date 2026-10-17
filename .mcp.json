@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "local-llm-remote": {
+      "type": "http",
+      "url": "https://minecraft-furnace.tail4b41c6.ts.net/mcp",
+      "headers": { "Authorization": "Bearer ${LOCAL_LLM_TOKEN}" }
+    }
+  }
+}
