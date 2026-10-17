@@ -1,0 +1,7 @@
+services:
+  quorum:
+    build: .
+    container_name: quorum-weather
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
