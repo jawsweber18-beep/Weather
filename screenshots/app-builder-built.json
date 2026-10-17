@@ -1,0 +1,40 @@
+{
+  "url": "http://127.0.0.1:8081/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Quorum",
+      "hasCanvas": false,
+      "bodyTextLen": 673,
+      "bodyTextHash": "05997748caf4c07de2aefb7a31c57725fd79eeb5a1eefdaa7363a9ca8e98bf66",
+      "bodyTextPrefix": "Quorum Several forecasts, read together. °F °C England, United K",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Quorum",
+      "hasCanvas": false,
+      "bodyTextLen": 688,
+      "bodyTextHash": "fe5d3112566e1bf0e4d3d9cc0f11b30e157a747607a58939f9c59d566d7b1546",
+      "bodyTextPrefix": "Quorum Several forecasts, read together. °F °C England, United K",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-built.json",
+  "divergesFromBaseline": true,
+  "baselineReasons": [
+    "mobile: body text changed (1307 -> 688 chars, hash mismatch)"
+  ]
+}

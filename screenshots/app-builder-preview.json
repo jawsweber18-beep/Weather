@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Quorum",
+      "hasCanvas": false,
+      "bodyTextLen": 725,
+      "bodyTextHash": "db281f62e58c804af3c47801af7e1f20826998ed9aed0b9f74e52a22927f78d0",
+      "bodyTextPrefix": "Quorum Several forecasts, read together. °F °C England, United K",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Quorum",
+      "hasCanvas": false,
+      "bodyTextLen": 1307,
+      "bodyTextHash": "72ce9033dbbb89b7c9309e7ca9ac9265c112e16b23b514465f8c3e65cc445f45",
+      "bodyTextPrefix": "Quorum Several forecasts, read together. °F °C England, United K",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}
