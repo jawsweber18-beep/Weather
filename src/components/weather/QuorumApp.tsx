@@ -32,6 +32,8 @@ import {
 } from "@/lib/weather/places";
 import { formatClock, formatDayName, formatHourTick, formatHourTip, formatLongDate, hourKeyNow, todayKey } from "@/lib/weather/time";
 import type { Briefing, Place, SourceForecast, Units } from "@/lib/weather/types";
+import type { SurfBriefing } from "@/lib/surf/types";
+import { SurfTab } from "@/components/surf/SurfTab";
 import type { HourlyChart } from "@/components/weather/HourlyChart";
 import type { RadarMap } from "@/components/weather/RadarMap";
 import { AccountMenu } from "@/components/weather/AccountMenu";
@@ -55,6 +57,8 @@ export function QuorumApp() {
   const [now, setNow] = useState<Date | null>(null);
   const [Chart, setChart] = useState<typeof HourlyChart | null>(null);
   const [MapView, setMapView] = useState<typeof RadarMap | null>(null);
+  const [surfData, setSurfData] = useState<SurfBriefing | null>(null);
+  const [surfLoaded, setSurfLoaded] = useState(false);
 
   useLayoutEffect(() => {
     const next = readSavedTheme() ?? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
@@ -170,6 +174,22 @@ export function QuorumApp() {
       return unique.find((date) => date >= today) ?? unique[0] ?? null;
     });
   }, [briefing, place]);
+
+  useEffect(() => {
+    if (!place) return;
+    let cancelled = false;
+    loadSurf({ data: { latitude: place.latitude, longitude: place.longitude, timezone: place.timezone } })
+      .then((data) => {
+        if (cancelled) return;
+        setSurfData(data);
+      })
+      .finally(() => {
+        if (!cancelled) setSurfLoaded(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [place]);
 
   function choosePlace(next: Place) {
     rememberPlace(next);
@@ -350,6 +370,8 @@ export function QuorumApp() {
             )}
           </>
         )}
+
+        {place && <SurfTab place={place} loaded={surfLoaded} />}
 
         <footer className="mt-8 pb-4 text-xs leading-relaxed text-muted">
           Global rows are ensemble means from ECMWF, NOAA GFS, DWD ICON, and Environment Canada GEM, via Open-Meteo.
