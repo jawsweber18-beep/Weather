@@ -102,3 +102,19 @@ export type BriefingInput = {
   longitude: number;
   timezone: string;
 };
+
+export type SurfDay = {
+  date: string;
+  heightM: number | null;
+  periodS: number | null;
+  directionDeg: number | null;
+  quality: string;
+};
+
+export type SurfBriefing = {
+  error: string | null;
+  generatedAt: string;
+  source: string | null;
+  days: SurfDay[];
+  spot: SurfDay | null;
+};

@@ -35,6 +35,9 @@ import type { Briefing, Place, SourceForecast, Units } from "@/lib/weather/types
 import type { HourlyChart } from "@/components/weather/HourlyChart";
 import type { RadarMap } from "@/components/weather/RadarMap";
 import { AccountMenu } from "@/components/weather/AccountMenu";
+import { SurfTab } from "@/components/weather/SurfTab";
+
+type Tab = "weather" | "surf";
 
 function applyTheme(next: ThemeChoice) {
   document.documentElement.dataset.theme = next;
@@ -55,6 +58,7 @@ export function QuorumApp() {
   const [now, setNow] = useState<Date | null>(null);
   const [Chart, setChart] = useState<typeof HourlyChart | null>(null);
   const [MapView, setMapView] = useState<typeof RadarMap | null>(null);
+  const [tab, setTab] = useState<Tab>("weather");
 
   useLayoutEffect(() => {
     const next = readSavedTheme() ?? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
@@ -237,8 +241,12 @@ export function QuorumApp() {
           </div>
         </header>
 
+        <TabBar tab={tab} onChange={setTab} />
+
         {!place ? (
           <Boot onPick={choosePlace} />
+        ) : tab === "surf" ? (
+          <SurfTab place={place} units={units} />
         ) : (
           <>
             <Hero
@@ -367,6 +375,33 @@ function Mark() {
       <circle cx="16" cy="16" r="10" fill="none" stroke="currentColor" strokeWidth="2.2" />
       <circle cx="16" cy="16" r="2.4" className="fill-ink" />
     </svg>
+  );
+}
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: "weather", label: "Weather" },
+  { id: "surf", label: "Surf" },
+];
+
+function TabBar({ tab, onChange }: { tab: Tab; onChange: (tab: Tab) => void }) {
+  return (
+    <div className="mt-5 flex rounded-full bg-surface p-1 shadow-card" role="tablist" aria-label="Sections">
+      {TABS.map((item) => (
+        <button
+          key={item.id}
+          type="button"
+          role="tab"
+          aria-selected={tab === item.id}
+          className={clsx(
+            "min-h-11 flex-1 rounded-full px-4 text-sm font-medium",
+            tab === item.id ? "bg-accent text-surface" : "text-muted",
+          )}
+          onClick={() => onChange(item.id)}
+        >
+          {item.label}
+        </button>
+      ))}
+    </div>
   );
 }
 
